@@ -34,7 +34,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .cover-large.ph{display:flex;align-items:center;justify-content:center;font-size:4rem;color:#fff}
 .song-prompt{font-size:1.3rem;font-weight:600;text-align:center;line-height:1.4;padding:0 8px;color:rgba(0,0,0,.75)}
 .song-prompt span{font-weight:700}
-.num-row{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;padding:0 4px;max-width:380px}
+.num-row{display:grid;grid-template-columns:repeat(5,32px);gap:6px;justify-content:center;padding:0 4px}
 .num-btn{width:32px;height:38px;border:2px solid rgba(0,0,0,.15);background:rgba(255,255,255,.5);border-radius:10px;font-size:1rem;font-weight:700;color:rgba(0,0,0,.55);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s ease;-webkit-tap-highlight-color:transparent;font-family:inherit}
 .num-btn:active{background:#fff;border-color:#c9a96e;color:#5c4016;transform:scale(1.08)}
 .num-btn.sel{background:#c9a96e;border-color:#b8985e;color:#fff;box-shadow:0 2px 8px rgba(201,169,110,.4)}
@@ -89,7 +89,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
   .cover-large{width:150px;height:150px}
   .song-prompt{font-size:1.15rem}
   .num-btn{width:30px;height:36px;font-size:.9rem}
-  .num-row{gap:3px}
+  .num-row{grid-template-columns:repeat(5,30px);gap:3px}
 }
 </style>
 </head>
