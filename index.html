@@ -36,7 +36,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .song-prompt{font-size:1.3rem;font-weight:600;text-align:center;line-height:1.4;padding:0 8px;color:rgba(0,0,0,.75)}
 .song-prompt span{font-weight:700}
 .song-prompt.anim{animation:fadeUp .3s ease-out}
-/* Number buttons */
 .num-row{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;padding:0 4px;max-width:380px}
 .num-btn{width:32px;height:38px;border:2px solid rgba(0,0,0,.15);background:rgba(255,255,255,.5);border-radius:10px;font-size:1rem;font-weight:700;color:rgba(0,0,0,.55);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s ease;-webkit-tap-highlight-color:transparent;font-family:inherit}
 .num-btn:hover,.num-btn:active{background:#fff;border-color:#c9a96e;color:#5c4016;transform:scale(1.08)}
@@ -51,8 +50,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 @keyframes fadeUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
 @keyframes fadeUpBig{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
 .quiz-main.anim-full{animation:fadeUpBig .35s ease-out}
-
-/* Results */
 #pageResults{background:#0d0d0d}
 .results-scroll{overflow-y:auto;width:100%;height:100%;padding:16px;max-width:960px;margin:0 auto;color:#f0ede8}
 .sec-title{font-family:'Playfair Display',Georgia,serif;font-size:1.5rem;color:var(--accent);text-align:center;margin:28px 0 16px}
@@ -85,7 +82,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .acard-stat span{font-weight:700;color:#f0ede8}
 .acard-rank{flex-shrink:0;display:flex;align-items:center;justify-content:center;width:42px;font-size:1.2rem;font-weight:800;color:rgba(255,255,255,.1)}
 .acard.animating{transition:transform .5s cubic-bezier(.25,.46,.45,.94)}
-.tag-tv{display:inline-block;font-size:.6rem;font-weight:600;color:#c9a96e;background:rgba(201,169,110,.15);padding:1px 5px;border-radius:3px}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#2a2a2a;color:#fff;padding:10px 22px;border-radius:100px;font-size:.8rem;z-index:1000;opacity:0;transition:opacity .3s ease;border:1px solid rgba(255,255,255,.1)}
 .toast.show{opacity:1}
 .overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px}
@@ -160,12 +156,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 
 <script>
 // ==================== SUPABASE ====================
-const SB_URL='https://tbyzwckixsfbeifmxjwr.supabase.co',SB_KEY='sb_publishable_ODd9XNmFeDEDso7eEGsFMw_WE8-8Vw7';
-async function sbFetch(p,m,b){const h={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};if(m==='POST'&&b)h['Prefer']='resolution=merge-duplicates';const r=await fetch(SB_URL+'/rest/v1/'+p,{method:m,headers:h,body:b?JSON.stringify(b):undefined});if(!r.ok&&m==='GET')throw new Error(r.statusText);return r}
-function uid(){let u=localStorage.getItem('ts_uid_v3');if(!u){u='u'+Math.random().toString(36).slice(2,10)+Date.now().toString(36);localStorage.setItem('ts_uid_v3',u)}return u}
+var SR = 'https://tbyzwckixsfbeifmxjwr.supabase.co';
+var SK2 = 'sb_publishable_ODd9XNmFeDEDso7eEGsFMw_WE8-8Vw7';
+async function sbFetch(p,m,b){
+  var h={'apikey':SK2,'Authorization':'Bearer '+SK2,'Content-Type':'application/json'};
+  if(m==='POST'&&b)h['Prefer']='resolution=merge-duplicates';
+  var r=await fetch(SR+'/rest/v1/'+p,{method:m,headers:h,body:b?JSON.stringify(b):undefined});
+  if(!r.ok&&m==='GET')throw new Error(r.statusText);
+  return r;
+}
+function uid(){
+  var u=localStorage.getItem('ts_uid_v3');
+  if(!u){u='u'+Math.random().toString(36).slice(2,10)+Date.now().toString(36);localStorage.setItem('ts_uid_v3',u)}
+  return u;
+}
 
 // ==================== EMOJI ====================
-const emojiSets={
+var emojiSets={
   'taylor-swift':['🤠','🪕','🎸','🌾','🌻','🦋','💚','🚜','🐎','⭐','🌅','👢'],
   'fearless':['💛','✨','⭐','🌟','👑','🫶','🎻','🌤️','🐴','🥇','🌼','💫'],
   'speak-now':['💜','👗','✨','🏰','👑','🎆','🎇','🦄','🌙','💌','🎭','🎻'],
@@ -181,173 +188,148 @@ const emojiSets={
 };
 
 // ==================== DATA ====================
-const albumDefs=[
-  {id:'taylor-swift',name:'Taylor Swift',year:2006,color:'#5ba3a3',colorL:'#d4edec',emoji:'taylor-swift',cover:'images/taylor_swift_2006.jpg',merged:false,origId:null,tvCover:null,
+var albumDefs=[
+  {id:'taylor-swift',name:'Taylor Swift',year:2006,color:'#5ba3a3',colorL:'#d4edec',emoji:'taylor-swift',cover:'images/taylor_swift_2006.jpg',merged:false,tvCover:null,
     songs:['Tim McGraw','Picture to Burn','Teardrops on My Guitar','A Place in This World','Cold as You','The Outside','Tied Together with a Smile','Stay Beautiful',"Should've Said No","Mary's Song (Oh My My My)",'Our Song',"I'm Only Me When I'm With You",'Invisible','A Perfectly Good Heart']},
-  {id:'fearless',name:'Fearless',year:2008,color:'#c4a35a',colorL:'#f5ebd6',emoji:'fearless',cover:'images/fearless_2008.jpg',merged:true,origId:null,tvCover:'images/fearless_tv_2021.jpg',tvColor:'#d4b36c',
+  {id:'fearless',name:'Fearless',year:2008,color:'#c4a35a',colorL:'#f5ebd6',emoji:'fearless',cover:'images/fearless_2008.jpg',merged:true,tvCover:'images/fearless_tv_2021.jpg',tvColor:'#d4b36c',
     songs:['Fearless','Fifteen','Love Story','Hey Stephen','White Horse','You Belong with Me','Breathe','Tell Me Why',"You're Not Sorry",'The Way I Loved You','Forever & Always','The Best Day','Change','Jump Then Fall','Untouchable','Come In With The Rain','Superstar','The Other Side of the Door']},
-  {id:'speak-now',name:'Speak Now',year:2010,color:'#8a55b8',colorL:'#ebe0f5',emoji:'speak-now',cover:'images/speak_now_2010.jpg',merged:true,origId:null,tvCover:'images/speak_now_tv_2023.jpg',tvColor:'#9a62c8',
+  {id:'speak-now',name:'Speak Now',year:2010,color:'#8a55b8',colorL:'#ebe0f5',emoji:'speak-now',cover:'images/speak_now_2010.jpg',merged:true,tvCover:'images/speak_now_tv_2023.jpg',tvColor:'#9a62c8',
     songs:['Mine','Sparks Fly','Back to December','Speak Now','Dear John','Mean','The Story of Us','Never Grow Up','Enchanted','Better Than Revenge','Innocent','Haunted','Last Kiss','Long Live','Ours','If This Was a Movie','Superman']},
-  {id:'red',name:'Red',year:2012,color:'#c9403d',colorL:'#f5dddc',emoji:'red',cover:'images/red_2012.jpg',merged:true,origId:null,tvCover:'images/red_tv_2021.jpg',tvColor:'#c94a3f',
+  {id:'red',name:'Red',year:2012,color:'#c9403d',colorL:'#f5dddc',emoji:'red',cover:'images/red_2012.jpg',merged:true,tvCover:'images/red_tv_2021.jpg',tvColor:'#c94a3f',
     songs:['State of Grace','Red','Treacherous','I Knew You Were Trouble','All Too Well','22','I Almost Do','We Are Never Ever Getting Back Together','Stay Stay Stay','Last Time','Holy Ground','Sad Beautiful Tragic','The Lucky One','Everything Has Changed','Starlight','Begin Again','The Moment I Knew','Come Back... Be Here','Girl at Home']},
-  {id:'1989',name:'1989',year:2014,color:'#7db8d8',colorL:'#d4ecf5',emoji:'1989',cover:'images/1989_2014.jpg',merged:true,origId:null,tvCover:'images/1989_tv_2023.jpg',tvColor:'#8cc8e4',
+  {id:'1989',name:'1989',year:2014,color:'#7db8d8',colorL:'#d4ecf5',emoji:'1989',cover:'images/1989_2014.jpg',merged:true,tvCover:'images/1989_tv_2023.jpg',tvColor:'#8cc8e4',
     songs:['Welcome to New York','Blank Space','Style','Out of the Woods','All You Had to Do Was Stay','Shake It Off','I Wish You Would','Bad Blood','Wildest Dreams','How You Get the Girl','This Love','I Know Places','Clean','Wonderland','You Are In Love','New Romantics']},
-  {id:'reputation',name:'Reputation',year:2017,color:'#3a3a3a',colorL:'#d9d9d9',emoji:'reputation',cover:'images/reputation_2017.jpg',merged:false,origId:null,tvCover:null,
+  {id:'reputation',name:'Reputation',year:2017,color:'#3a3a3a',colorL:'#d9d9d9',emoji:'reputation',cover:'images/reputation_2017.jpg',merged:false,tvCover:null,
     songs:['...Ready for It?','End Game','I Did Something Bad',"Don't Blame Me",'Delicate','Look What You Made Me Do','So It Goes...','Gorgeous','Getaway Car','King of My Heart','Dancing with Our Hands Tied','Dress',"This Is Why We Can't Have Nice Things",'Call It What You Want',"New Year's Day"]},
-  {id:'lover',name:'Lover',year:2019,color:'#e8a0c8',colorL:'#fae8f2',emoji:'lover',cover:'images/lover_2019.jpg',merged:false,origId:null,tvCover:null,
+  {id:'lover',name:'Lover',year:2019,color:'#e8a0c8',colorL:'#fae8f2',emoji:'lover',cover:'images/lover_2019.jpg',merged:false,tvCover:null,
     songs:['I Forgot That You Existed','Cruel Summer','Lover','The Man','The Archer','I Think He Knows','Miss Americana & the Heartbreak Prince','Paper Rings','Cornelia Street','Death by a Thousand Cuts','London Boy',"Soon You'll Get Better",'False God','You Need to Calm Down','Afterglow','ME!',"It's Nice to Have a Friend",'Daylight']},
-  {id:'folklore',name:'Folklore',year:2020,color:'#9ba3a0',colorL:'#e6e8e7',emoji:'folklore',cover:'images/folklore_2020.jpg',merged:false,origId:null,tvCover:null,
+  {id:'folklore',name:'Folklore',year:2020,color:'#9ba3a0',colorL:'#e6e8e7',emoji:'folklore',cover:'images/folklore_2020.jpg',merged:false,tvCover:null,
     songs:['the 1','cardigan','the last great american dynasty','exile','my tears ricochet','mirrorball','seven','august','this is me trying','illicit affairs','invisible string','mad woman','epiphany','betty','peace','hoax','the lakes']},
-  {id:'evermore',name:'Evermore',year:2020,color:'#a07830',colorL:'#ede3d1',emoji:'evermore',cover:'images/evermore_2020.jpg',merged:false,origId:null,tvCover:null,
+  {id:'evermore',name:'Evermore',year:2020,color:'#a07830',colorL:'#ede3d1',emoji:'evermore',cover:'images/evermore_2020.jpg',merged:false,tvCover:null,
     songs:['willow','champagne problems','gold rush',"'tis the damn season",'tolerate it','no body, no crime','happiness','dorothea','coney island','ivy','cowboy like me','long story short','marjorie','closure','evermore','right where you left me',"it's time to go"]},
-  {id:'midnights',name:'Midnights',year:2022,color:'#3a5580',colorL:'#dae2f0',emoji:'midnights',cover:'images/midnights_2022.jpg',merged:false,origId:null,tvCover:null,
+  {id:'midnights',name:'Midnights',year:2022,color:'#3a5580',colorL:'#dae2f0',emoji:'midnights',cover:'images/midnights_2022.jpg',merged:false,tvCover:null,
     songs:['Lavender Haze','Maroon','Anti-Hero','Snow on the Beach',"You're on Your Own, Kid",'Midnight Rain','Question...?','Vigilante Shit','Bejeweled','Labyrinth','Karma','Sweet Nothing','Mastermind','The Great War','Bigger Than The Whole Sky','Paris','High Infidelity','Glitch',"Would've, Could've, Should've",'Dear Reader']},
-  {id:'ttpd',name:'The Tortured Poets Department',year:2024,color:'#c9b99a',colorL:'#f2efe5',emoji:'ttpd',cover:'images/ttpd_2024.jpg',merged:false,origId:null,tvCover:null,
+  {id:'ttpd',name:'The Tortured Poets Department',year:2024,color:'#c9b99a',colorL:'#f2efe5',emoji:'ttpd',cover:'images/ttpd_2024.jpg',merged:false,tvCover:null,
     songs:['Fortnight','The Tortured Poets Department','My Boy Only Breaks His Favorite Toys','Down Bad','So Long, London','But Daddy I Love Him','Fresh Out the Slammer','Florida!!!','Guilty as Sin?',"Who's Afraid of Little Old Me?",'I Can Fix Him (No Really I Can)','Loml','I Can Do It with a Broken Heart','The Smallest Man Who Ever Lived','The Alchemy','Clara Bow','The Black Dog','imgonnagetyouback','The Albatross','Chloe or Sam or Sophia or Marcus','How Did It End?','So High School','I Hate It Here','thanK you aIMee',"I Look in People's Windows",'The Prophecy','Cassandra','Peter','The Bolter','Robin','The Manuscript']},
-  {id:'showgirl',name:'The Life of a Showgirl',year:2025,color:'#d4af37',colorL:'#f7f0d8',emoji:'showgirl',cover:'images/showgirl_2025.jpg',merged:false,origId:null,tvCover:null,
+  {id:'showgirl',name:'The Life of a Showgirl',year:2025,color:'#d4af37',colorL:'#f7f0d8',emoji:'showgirl',cover:'images/showgirl_2025.jpg',merged:false,tvCover:null,
     songs:['The Fate of Ophelia','Elizabeth Taylor','Opalite','Father Figure','Eldest Daughter','Ruin The Friendship','Actually Romantic','Wi$h Li$t','Wood','CANCELLED!','Honey','The Life of a Showgirl']}
 ];
 
-// TV vault tracks
-const tvVaults={
+var tvVaults={
   'fearless':{color:'#d4b36c',colorL:'#f7edd8',cover:'images/fearless_tv_2021.jpg',year:2021,
-    songs:['Today Was a Fairytale','You All Over Me','Mr. Perfectly Fine','We Were Happy',"That's When",'Don\'t You','Bye Bye Baby']},
+    songs:['Today Was a Fairytale','You All Over Me','Mr. Perfectly Fine','We Were Happy',"That's When","Don't You",'Bye Bye Baby']},
   'red':{color:'#c94a3f',colorL:'#f5d8d6',cover:'images/red_tv_2021.jpg',year:2021,
     songs:['Ronan','Better Man','Nothing New','Babe','Message In A Bottle','I Bet You Think About Me','Forever Winter','Run','The Very First Night','All Too Well (10 Minute Version)']},
   'speak-now':{color:'#9a62c8',colorL:'#ece0f7',cover:'images/speak_now_tv_2023.jpg',year:2023,
     songs:['Electric Touch','When Emma Falls in Love','I Can See You','Castles Crumbling','Foolish One','Timeless']},
   '1989':{color:'#8cc8e4',colorL:'#daeff7',cover:'images/1989_tv_2023.jpg',year:2023,
-    songs:['"Slut!"','Say Don\'t Go','Now That We Don\'t Talk','Suburban Legends','Is It Over Now?']}
+    songs:['"Slut!"',"Say Don't Go","Now That We Don't Talk",'Suburban Legends','Is It Over Now?']}
 };
 
-// Build quiz sequence: original songs then TV vaults
-const quizSongs=[];
-const songMeta=[]; // parallel: {albumId, songIdx, isVault}
-albumDefs.forEach(alb=>{
-  alb.songs.forEach((song,si)=>{quizSongs.push(song);songMeta.push({albumId:alb.id,songIdx:si,isVault:false});});
+// Build quiz sequence
+var quizSongs=[],songMeta=[];
+albumDefs.forEach(function(alb){
+  alb.songs.forEach(function(song,si){quizSongs.push(song);songMeta.push({albumId:alb.id,songIdx:si,isVault:false})});
   if(tvVaults[alb.id]){
-    const tv=tvVaults[alb.id];
-    tv.songs.forEach((song,si)=>{quizSongs.push(song);songMeta.push({albumId:alb.id,songIdx:alb.songs.length+si,isVault:true});});
+    var tv=tvVaults[alb.id];
+    tv.songs.forEach(function(song,si){quizSongs.push(song);songMeta.push({albumId:alb.id,songIdx:alb.songs.length+si,isVault:true})});
   }
 });
-const TOTAL=quizSongs.length;
+var TOTAL=quizSongs.length;
 
-// ==================== STATE ====================
-const SK='ts-quiz-v3';
-let ratings={};let ci=0;let sm='mean';let pc=null,gc=null,submitted=false;
-function loadR(){try{const s=localStorage.getItem(SK);if(s)ratings=JSON.parse(s)}catch(e){ratings={}};submitted=!!localStorage.getItem('ts_done_v3')}
+var SK='ts-quiz-v3';
+var ratings={},ci=0,sm='mean',pc=null,gc=null,submitted=false;
+function loadR(){try{var s=localStorage.getItem(SK);if(s)ratings=JSON.parse(s)}catch(e){ratings={}};submitted=!!localStorage.getItem('ts_done_v3')}
 function saveR(){localStorage.setItem(SK,JSON.stringify(ratings))}
 function getR(aid,si){return(ratings[aid]&&ratings[aid][si]!==undefined)?ratings[aid][si]:0}
 function setR(aid,si,v){if(!ratings[aid])ratings[aid]={};ratings[aid][si]=v;saveR()}
-function cntR(){let c=0;albumDefs.forEach(a=>{a.songs.forEach((_,si)=>{if(getR(a.id,si)>=1)c++});if(tvVaults[a.id]){tvVaults[a.id].songs.forEach((_,si)=>{if(getR(a.id,a.songs.length+si)>=1)c++})}});return c}
+function cntR(){var c=0;albumDefs.forEach(function(a){a.songs.forEach(function(_,si){if(getR(a.id,si)>=1)c++});if(tvVaults[a.id]){tvVaults[a.id].songs.forEach(function(_,si){if(getR(a.id,a.songs.length+si)>=1)c++})}});return c}
 
-// For merged albums: combine original + vault into one stats entry
 function calcMerged(alb){
-  const origN=alb.songs.length;
-  const tv=tvVaults[alb.id];const vaultN=tv?tv.songs.length:0;
-  const totalN=origN+vaultN;
-  let vals=[];
-  alb.songs.forEach((_,si)=>{const v=getR(alb.id,si);if(v>=1)vals.push(v)});
-  if(tv){tv.songs.forEach((_,si)=>{const v=getR(alb.id,origN+si);if(v>=1)vals.push(v)})}
-  const n=vals.length;if(n===0)return{mean:null,variance:null,rc:0,total:totalN};
-  const sum=vals.reduce((a,b)=>a+b,0);const mean=sum/n;
-  return{mean,variance:vals.reduce((s,v)=>s+(v-mean)**2,0)/n,rc:n,total:totalN};
+  var origN=alb.songs.length;
+  var tv=tvVaults[alb.id],vaultN=tv?tv.songs.length:0;
+  var totalN=origN+vaultN;
+  var vals=[];
+  alb.songs.forEach(function(_,si){var v=getR(alb.id,si);if(v>=1)vals.push(v)});
+  if(tv){tv.songs.forEach(function(_,si){var v=getR(alb.id,origN+si);if(v>=1)vals.push(v)})}
+  var n=vals.length;if(n===0)return{mean:null,variance:null,rc:0,total:totalN};
+  var sum=vals.reduce(function(a,b){return a+b},0),mean=sum/n;
+  return{mean:mean,variance:vals.reduce(function(s,v){return s+(v-mean)*(v-mean)},0)/n,rc:n,total:totalN};
 }
 
-function getDisplayAlbums(){
-  return albumDefs.map(alb=>({...alb,stats:calcMerged(alb)}));
-}
+function getDisplayAlbums(){return albumDefs.map(function(alb){var o={};for(var k in alb){if(alb.hasOwnProperty(k))o[k]=alb[k]}o.stats=calcMerged(alb);return o})}
 
 function getSorted(){
-  const w=getDisplayAlbums();
-  w.sort((a,b)=>{
-    const va=sm==='mean'?a.stats.mean:a.stats.variance;
-    const vb=sm==='mean'?b.stats.mean:b.stats.variance;
+  var w=getDisplayAlbums();
+  w.sort(function(a,b){
+    var va=sm==='mean'?a.stats.mean:a.stats.variance;
+    var vb=sm==='mean'?b.stats.mean:b.stats.variance;
     if(va===null&&vb===null)return 0;if(va===null)return 1;if(vb===null)return-1;
     return sm==='mean'?vb-va:va-vb;
   });return w;
 }
 
-// ==================== LANDING ====================
 function initLanding(){
-  const bg=document.getElementById('landingBg');
-  const covers=albumDefs.map(a=>a.cover).filter(c=>c);
-  for(let i=0;i<22;i++){const img=document.createElement('img');img.src=covers[i%covers.length];img.className='cover-float';img.style.left=Math.random()*90+'%';img.style.top=Math.random()*90+'%';img.style.animationDelay=Math.random()*6+'s';img.style.animationDuration=(5+Math.random()*6)+'s';img.onerror=function(){this.remove()};bg.appendChild(img)}
+  var bg=document.getElementById('landingBg');
+  var covers=albumDefs.map(function(a){return a.cover}).filter(function(c){return c});
+  for(var i=0;i<22;i++){var img=document.createElement('img');img.src=covers[i%covers.length];img.className='cover-float';img.style.left=Math.random()*90+'%';img.style.top=Math.random()*90+'%';img.style.animationDelay=Math.random()*6+'s';img.style.animationDuration=(5+Math.random()*6)+'s';img.onerror=function(){this.remove()};bg.appendChild(img)}
   if(cntR()>0)document.getElementById('btnResume').style.display='';
 }
 
-// ==================== EMOJI ====================
 function renderEmoji(aid){
-  const bg=document.getElementById('emojiBg');
-  const alb=albumDefs.find(a=>a.id===aid)||{emoji:'taylor-swift'};
-  const es=emojiSets[alb.emoji]||emojiSets['taylor-swift'];
+  var bg=document.getElementById('emojiBg');
+  var alb=albumDefs.find(function(a){return a.id===aid})||{emoji:'taylor-swift'};
+  var es=emojiSets[alb.emoji]||emojiSets['taylor-swift'];
   bg.innerHTML='';
-  for(let i=0;i<28;i++){const s=document.createElement('span');s.textContent=es[i%es.length];s.style.left=Math.random()*95+'%';s.style.top=Math.random()*95+'%';s.style.animationDelay=Math.random()*8+'s';s.style.animationDuration=(6+Math.random()*7)+'s';s.style.fontSize=(1.2+Math.random()*2)+'rem';bg.appendChild(s)}
+  for(var i=0;i<28;i++){var s=document.createElement('span');s.textContent=es[i%es.length];s.style.left=Math.random()*95+'%';s.style.top=Math.random()*95+'%';s.style.animationDelay=Math.random()*8+'s';s.style.animationDuration=(6+Math.random()*7)+'s';s.style.fontSize=(1.2+Math.random()*2)+'rem';bg.appendChild(s)}
 }
 
-// ==================== QUIZ ====================
-function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function showPage(id){document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});document.getElementById(id).classList.add('active')}
 function startQuiz(){ci=0;showPage('pageQuiz');renderQuiz()}
-function resumeQuiz(){let last=-1;for(let i=TOTAL-1;i>=0;i--){const m=songMeta[i];if(getR(m.albumId,m.songIdx)>=1){last=i;break}}ci=last>=0?Math.min(last+1,TOTAL-1):0;showPage('pageQuiz');renderQuiz()}
+function resumeQuiz(){var last=-1;for(var i=TOTAL-1;i>=0;i--){var m=songMeta[i];if(getR(m.albumId,m.songIdx)>=1){last=i;break}}ci=last>=0?Math.min(last+1,TOTAL-1):0;showPage('pageQuiz');renderQuiz()}
 
-let lastAlbumId=null;
+var lastAlbumId=null;
 
 function renderQuiz(){
-  const meta=songMeta[ci];const alb=albumDefs.find(a=>a.id===meta.albumId);
-  const isVault=meta.isVault;
-  const albumChanged=!lastAlbumId||lastAlbumId!==meta.albumId;
-  
-  // Determine current display info
-  let dispCover,dispColor,dispColorL,dispName,dispYear;
-  if(isVault){
-    const tv=tvVaults[meta.albumId];
-    dispCover=tv.cover;dispColor=tv.color;dispColorL=tv.colorL;dispName=alb.name+' (TV)';dispYear=tv.year;
-  }else{
-    dispCover=alb.cover;dispColor=alb.color;dispColorL=alb.colorL;dispName=alb.name;dispYear=alb.year;
-  }
+  var meta=songMeta[ci],alb=albumDefs.find(function(a){return a.id===meta.albumId});
+  var isVault=meta.isVault;
+  var albumChanged=!lastAlbumId||lastAlbumId!==meta.albumId;
 
-  // Full animation if album changed
-  const qm=document.getElementById('quizMain');
+  var dispCover,dispColor,dispColorL,dispName,dispYear;
+  if(isVault){var tv=tvVaults[meta.albumId];dispCover=tv.cover;dispColor=tv.color;dispColorL=tv.colorL;dispName=alb.name+' (TV)';dispYear=tv.year}
+  else{dispCover=alb.cover;dispColor=alb.color;dispColorL=alb.colorL;dispName=alb.name;dispYear=alb.year}
+
+  var qm=document.getElementById('quizMain');
   if(albumChanged){
     lastAlbumId=meta.albumId;
     qm.classList.remove('anim-full');void qm.offsetWidth;qm.classList.add('anim-full');
-    // Also animate cover
-    document.getElementById('qCover').style.transition='all .4s ease';
     document.getElementById('emojiBg').style.opacity='0';
-    setTimeout(()=>{renderEmoji(meta.albumId);document.getElementById('emojiBg').style.opacity='0.3'},200);
+    setTimeout(function(){renderEmoji(meta.albumId);document.getElementById('emojiBg').style.opacity='0.3'},200);
   }
 
-  // Background
   document.getElementById('pageQuiz').style.background=dispColorL||'#f5f3f0';
-
-  // Progress
   document.getElementById('pbFill').style.width=(ci/TOTAL*100)+'%';
   document.getElementById('pbFill').style.background=dispColor;
-  document.getElementById('pbLabel').textContent=`第 ${ci+1} / ${TOTAL} 首`;
-  document.getElementById('pbAlbum').textContent=dispName+' · '+dispYear;
+  document.getElementById('pbLabel').textContent='第 '+(ci+1)+' / '+TOTAL+' 首';
+  document.getElementById('pbAlbum').textContent=dispName+' \u00b7 '+dispYear;
   document.getElementById('qLabel').textContent=dispName;
   document.getElementById('qLabel').style.color=dispColor;
 
-  // Cover
-  const cov=document.getElementById('qCover'),cph=document.getElementById('qCoverPH');
+  var cov=document.getElementById('qCover'),cph=document.getElementById('qCoverPH');
   cph.style.background=dispColor;
   if(dispCover){cov.src=dispCover;cov.style.display='';cph.style.display='none'}else{cov.style.display='none';cph.style.display='flex'}
 
-  // Prompt - always animate
-  const prompt=document.getElementById('qPrompt');
+  var prompt=document.getElementById('qPrompt');
   prompt.classList.remove('anim');void prompt.offsetWidth;prompt.classList.add('anim');
   prompt.innerHTML='你给 <span style="color:'+dispColor+'">'+es(quizSongs[ci])+'</span> 打几分？';
 
-  // Number buttons
-  const nr=document.getElementById('qNums');
-  const r=getR(meta.albumId,meta.songIdx);
-  let h='';
-  for(let v=1;v<=10;v++)h+=`<button class="num-btn${r===v?' selected':''}" data-val="${v}">${v}</button>`;
+  var nr=document.getElementById('qNums'),r=getR(meta.albumId,meta.songIdx),h='';
+  for(var v=1;v<=10;v++)h+='<button class="num-btn'+(r===v?' selected':'')+'" data-val="'+v+'">'+v+'</button>';
   nr.innerHTML=h;
-  nr.querySelectorAll('.num-btn').forEach(btn=>{btn.addEventListener('click',function(){const v=+this.dataset.val;setR(meta.albumId,meta.songIdx,v);nr.querySelectorAll('.num-btn').forEach(b=>b.classList.toggle('selected',+b.dataset.val===v));setTimeout(()=>nextSong(),300);})});
+  nr.querySelectorAll('.num-btn').forEach(function(btn){btn.addEventListener('click',function(){var v=+this.dataset.val;setR(meta.albumId,meta.songIdx,v);nr.querySelectorAll('.num-btn').forEach(function(b){b.classList.toggle('selected',+b.dataset.val===v)});setTimeout(function(){nextSong()},300)})});
 
   document.getElementById('btnPrev').disabled=ci===0;
-  document.getElementById('btnNext').textContent=ci===TOTAL-1?'完成 ✨':'→';
+  document.getElementById('btnNext').textContent=ci===TOTAL-1?'完成 \u2728':'\u2192';
 }
 
 function nextSong(){if(ci<TOTAL-1){ci++;renderQuiz()}else finishQuiz()}
@@ -355,101 +337,99 @@ function prevSong(){if(ci>0){ci--;renderQuiz()}}
 
 async function finishQuiz(){
   document.getElementById('doneOverlay').classList.add('show');
-  try{await sbFetch('album_ratings','POST',{user_id:uid(),ratings,updated_at:new Date().toISOString()})}catch(e){}
+  try{await sbFetch('album_ratings','POST',{user_id:uid(),ratings:ratings,updated_at:new Date().toISOString()})}catch(e){}
   submitted=true;localStorage.setItem('ts_done_v3','true');
-  setTimeout(()=>{document.getElementById('doneOverlay').classList.remove('show');showPage('pageResults');renderResults(true);fetchGlobal()},800);
+  setTimeout(function(){document.getElementById('doneOverlay').classList.remove('show');showPage('pageResults');renderResults(true);fetchGlobal()},800);
 }
 
-// ==================== RESULTS ====================
 function renderResults(animate){
-  const sorted=getSorted();
-  const tb=sorted.reduce((s,a)=>s+a.stats.rc,0);
-  const ts=sorted.reduce((s,a)=>s+a.stats.total,0);
-  document.getElementById('statsBar').innerHTML=`<div class="stat-chip">已评 <strong>${tb}</strong> / ${ts} 首</div><div class="stat-chip">专辑 <strong>${sorted.length}</strong> 张</div>`;
+  var sorted=getSorted();
+  var tb=sorted.reduce(function(s,a){return s+a.stats.rc},0);
+  var ts=sorted.reduce(function(s,a){return s+a.stats.total},0);
+  document.getElementById('statsBar').innerHTML='<div class="stat-chip">已评 <strong>'+tb+'</strong> / '+ts+' 首</div><div class="stat-chip">专辑 <strong>'+sorted.length+'</strong> 张</div>';
 
-  const rg=document.getElementById('rankingGrid');
-  const old=new Map();rg.querySelectorAll('.acard').forEach(c=>old.set(c.dataset.aid,c.getBoundingClientRect().top));
-  rg.innerHTML=getSorted().map((a,rk)=>buildRankCard(a,rk)).join('');
-  rg.querySelectorAll('.acard').forEach(card=>{
-    const ot=old.get(card.dataset.aid);if(ot!==undefined){const d=ot-card.getBoundingClientRect().top;if(Math.abs(d)>.5){card.style.transform=`translateY(${d}px)`;card.classList.add('animating');requestAnimationFrame(()=>{card.style.transform='translateY(0)'});card.addEventListener('transitionend',function h(){card.classList.remove('animating');card.style.transform='';card.removeEventListener('transitionend',h)})}}
+  var rg=document.getElementById('rankingGrid'),old=new Map();
+  rg.querySelectorAll('.acard').forEach(function(c){old.set(c.dataset.aid,c.getBoundingClientRect().top)});
+  rg.innerHTML=getSorted().map(function(a,rk){return buildRankCard(a,rk)}).join('');
+  rg.querySelectorAll('.acard').forEach(function(card){
+    var ot=old.get(card.dataset.aid);if(ot!==undefined){var d=ot-card.getBoundingClientRect().top;if(Math.abs(d)>.5){card.style.transform='translateY('+d+'px)';card.classList.add('animating');requestAnimationFrame(function(){card.style.transform='translateY(0)'});card.addEventListener('transitionend',function h(){card.classList.remove('animating');card.style.transform='';card.removeEventListener('transitionend',h)})}}
   });
   updateBtns();
-  const labels=sorted.map(a=>a.name.length>14?a.name.substring(0,13)+'\u2026':a.name);
-  if(pc){pc.data.labels=labels;pc.data.datasets[0].data=sorted.map(a=>a.stats.mean);pc.data.datasets[1].data=sorted.map(a=>a.stats.variance);pc.update(animate?'active':'none')}else renderChart(sorted);
+  var labels=sorted.map(function(a){return a.name.length>14?a.name.substring(0,13)+'\u2026':a.name});
+  if(pc){pc.data.labels=labels;pc.data.datasets[0].data=sorted.map(function(a){return a.stats.mean});pc.data.datasets[1].data=sorted.map(function(a){return a.stats.variance});pc.update(animate?'active':'none')}else renderChart(sorted);
 }
 
 function buildRankCard(alb,rank){
-  const s=alb.stats;
-  let coverHTML='';
+  var s=alb.stats,coverHTML='';
   if(alb.merged&&alb.tvCover){
-    coverHTML=`<div class="split split-tl"><img src="${alb.cover}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.style.background='${alb.color}'" /></div><div class="split split-br"><img src="${alb.tvCover}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.style.background='${alb.tvColor}'" /></div>`;
+    coverHTML='<div class="split split-tl"><img src="'+alb.cover+'" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.style.background=\''+alb.color+'\'" /></div><div class="split split-br"><img src="'+alb.tvCover+'" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.style.background=\''+alb.tvColor+'\'" /></div>';
   }else if(alb.cover){
-    coverHTML=`<img src="${alb.cover}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="acard-ph" style="background:${alb.color};display:none">🎵</div>`;
+    coverHTML='<img src="'+alb.cover+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'" /><div class="acard-ph" style="background:'+alb.color+';display:none">\uD83C\uDFB5</div>';
   }
-  return `<div class="acard" data-aid="${alb.id}" style="border-left-color:${alb.color}">
-    <div class="acard-inner">
-      <div class="acard-cover">${coverHTML}</div>
-      <div class="acard-info"><div class="acard-hd"><span class="acard-name">${es(alb.name)}</span><span class="acard-year">${alb.merged?'2008-'+alb.year:alb.year}</span></div><div class="acard-stats"><span class="acard-stat">均 <span>${s.mean!==null?s.mean.toFixed(2):'—'}</span></span><span class="acard-stat">方 <span>${s.variance!==null?s.variance.toFixed(2):'—'}</span></span><span class="acard-stat">评 <span>${s.rc}/${s.total}</span></span></div></div>
-      <div class="acard-rank">#${rank+1}</div>
-    </div></div>`;
+  return '<div class="acard" data-aid="'+alb.id+'" style="border-left-color:'+alb.color+'"><div class="acard-inner"><div class="acard-cover">'+coverHTML+'</div><div class="acard-info"><div class="acard-hd"><span class="acard-name">'+es(alb.name)+'</span><span class="acard-year">'+(alb.merged?'2008-'+alb.year:alb.year)+'</span></div><div class="acard-stats"><span class="acard-stat">均 <span>'+(s.mean!==null?s.mean.toFixed(2):'\u2014')+'</span></span><span class="acard-stat">方 <span>'+(s.variance!==null?s.variance.toFixed(2):'\u2014')+'</span></span><span class="acard-stat">评 <span>'+s.rc+'/'+s.total+'</span></span></div></div><div class="acard-rank">#'+(rank+1)+'</div></div></div>';
 }
 
 function renderChart(sorted){
-  pc=new Chart(document.getElementById('chartCanvas').getContext('2d'),{
-    type:'line',data:{labels:sorted.map(a=>a.name.length>14?a.name.substring(0,13)+'\u2026':a.name),datasets:[
-      {label:'平均分',data:sorted.map(a=>a.stats.mean),borderColor:'#c9a96e',backgroundColor:'rgba(201,169,110,.08)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#c9a96e',pointBorderColor:'#1a1a1a',pointBorderWidth:2,tension:.35,fill:true,yAxisID:'y',order:1},
-      {label:'方差',data:sorted.map(a=>a.stats.variance),borderColor:'#7b9eaf',backgroundColor:'rgba(123,158,175,.08)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#7b9eaf',pointBorderColor:'#1a1a1a',pointBorderWidth:2,tension:.35,borderDash:[6,3],fill:true,yAxisID:'y1',order:2}]},
+  var ctx=document.getElementById('chartCanvas').getContext('2d');
+  pc=new Chart(ctx,{type:'line',data:{labels:sorted.map(function(a){return a.name.length>14?a.name.substring(0,13)+'\u2026':a.name}),datasets:[
+    {label:'平均分',data:sorted.map(function(a){return a.stats.mean}),borderColor:'#c9a96e',backgroundColor:'rgba(201,169,110,0.08)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#c9a96e',pointBorderColor:'#1a1a1a',pointBorderWidth:2,tension:0.35,fill:true,yAxisID:'y',order:1},
+    {label:'方差',data:sorted.map(function(a){return a.stats.variance}),borderColor:'#7b9eaf',backgroundColor:'rgba(123,158,175,0.08)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#7b9eaf',pointBorderColor:'#1a1a1a',pointBorderWidth:2,tension:0.35,borderDash:[6,3],fill:true,yAxisID:'y1',order:2}]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{position:'top',labels:{usePointStyle:true,pointStyleWidth:8,padding:18,font:{size:11},color:'#a09888'}},tooltip:{backgroundColor:'#2a2a2a',titleFont:{size:11},bodyFont:{size:10},padding:8,cornerRadius:6}},
       scales:{x:{ticks:{font:{size:9},color:'#a09888',maxRotation:45,minRotation:0},grid:{display:false}},
-        y:{type:'linear',position:'left',min:1,max:10,ticks:{stepSize:2,font:{size:9},color:'#c9a96e'},grid:{color:'rgba(255,255,255,.06)'},title:{display:true,text:'平均分',color:'#c9a96e',font:{size:10,weight:'600'}}},
-        y1:{type:'linear',position:'right',min:0,ticks:{font:{size:9},color:'#7b9eaf',callback:v=>v.toFixed(1)},grid:{drawOnChartArea:false},title:{display:true,text:'方差',color:'#7b9eaf',font:{size:10,weight:'600'}}}},
+        y:{type:'linear',position:'left',min:1,max:10,ticks:{stepSize:2,font:{size:9},color:'#c9a96e'},grid:{color:'rgba(255,255,255,0.06)'},title:{display:true,text:'平均分',color:'#c9a96e',font:{size:10,weight:'600'}}},
+        y1:{type:'linear',position:'right',min:0,ticks:{font:{size:9},color:'#7b9eaf',callback:function(v){return v.toFixed(1)}},grid:{drawOnChartArea:false},title:{display:true,text:'方差',color:'#7b9eaf',font:{size:10,weight:'600'}}}},
       animation:{duration:500}}
   });
 }
 
-// ==================== GLOBAL ====================
 async function fetchGlobal(){
-  try{const res=await sbFetch('album_ratings?select=ratings','GET');const data=await res.json();if(!data||!data.length){showT('暂无全体数据');return}
-    const agg={};albumDefs.forEach(a=>{agg[a.id]={sum:0,count:0}});let tu=0;
-    data.forEach(row=>{if(!row.ratings)return;tu++;
-      albumDefs.forEach(alb=>{
-        const origN=alb.songs.length,tv=tvVaults[alb.id];const tvN=tv?tv.songs.length:0;
-        alb.songs.forEach((_,si)=>{const v=(row.ratings[alb.id]||{})[si];if(v&&v>=1){agg[alb.id].sum+=v;agg[alb.id].count++}});
-        if(tv){tv.songs.forEach((_,si)=>{const v=(row.ratings[alb.id]||{})[origN+si];if(v&&v>=1){agg[alb.id].sum+=v;agg[alb.id].count++}})}
+  try{
+    var res=await sbFetch('album_ratings?select=ratings','GET'),data=await res.json();
+    if(!data||!data.length){showT('暂无全体数据');return}
+    var agg={};albumDefs.forEach(function(a){agg[a.id]={sum:0,count:0}});var tu=0;
+    data.forEach(function(row){if(!row.ratings)return;tu++;
+      albumDefs.forEach(function(alb){
+        var origN=alb.songs.length,tv=tvVaults[alb.id];
+        alb.songs.forEach(function(_,si){var v=(row.ratings[alb.id]||{})[si];if(v&&v>=1){agg[alb.id].sum+=v;agg[alb.id].count++}});
+        if(tv){tv.songs.forEach(function(_,si){var v=(row.ratings[alb.id]||{})[origN+si];if(v&&v>=1){agg[alb.id].sum+=v;agg[alb.id].count++}})}
       });
     });
-    const gs=albumDefs.map(alb=>({...alb,stats:{mean:agg[alb.id].count>0?agg[alb.id].sum/agg[alb.id].count:null,rc:agg[alb.id].count,tu}}));
-    gs.sort((a,b)=>(a.stats.mean===null?1:b.stats.mean===null?-1:b.stats.mean-a.stats.mean));
-    document.getElementById('gStatsBar').innerHTML=`<div class="stat-chip">参与 <strong>${tu}</strong> 人</div>`;
-    document.getElementById('gRankingGrid').innerHTML=gs.map((alb,rank)=>{
-      const s=alb.stats;let coverHTML='';
-      if(alb.merged&&alb.tvCover){coverHTML=`<div class="split split-tl"><img src="${alb.cover}" style="width:100%;height:100%;object-fit:cover" /></div><div class="split split-br"><img src="${alb.tvCover}" style="width:100%;height:100%;object-fit:cover" /></div>`}else if(alb.cover){coverHTML=`<img src="${alb.cover}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="acard-ph" style="background:${alb.color};display:none">🎵</div>`}
-      return `<div class="acard" style="border-left-color:${alb.color}"><div class="acard-inner"><div class="acard-cover">${coverHTML}</div><div class="acard-info"><div class="acard-hd"><span class="acard-name">${es(alb.name)}</span><span class="acard-year">${alb.merged?'2008-'+alb.year:alb.year}</span></div><div class="acard-stats"><span class="acard-stat">均 <span>${s.mean!==null?s.mean.toFixed(2):'—'}</span></span><span class="acard-stat">次 <span>${s.rc}</span></span></div></div><div class="acard-rank">#${rank+1}</div></div></div>`;
+    var gs=albumDefs.map(function(alb){var o={};for(var k in alb){if(alb.hasOwnProperty(k))o[k]=alb[k]}o.stats={mean:agg[alb.id].count>0?agg[alb.id].sum/agg[alb.id].count:null,rc:agg[alb.id].count,tu:tu};return o});
+    gs.sort(function(a,b){return(a.stats.mean===null?1:b.stats.mean===null?-1:b.stats.mean-a.stats.mean)});
+    document.getElementById('gStatsBar').innerHTML='<div class="stat-chip">参与 <strong>'+tu+'</strong> 人</div>';
+    document.getElementById('gRankingGrid').innerHTML=gs.map(function(alb,rank){
+      var s=alb.stats,coverHTML='';
+      if(alb.merged&&alb.tvCover){coverHTML='<div class="split split-tl"><img src="'+alb.cover+'" style="width:100%;height:100%;object-fit:cover" /></div><div class="split split-br"><img src="'+alb.tvCover+'" style="width:100%;height:100%;object-fit:cover" /></div>'}
+      else if(alb.cover){coverHTML='<img src="'+alb.cover+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'" /><div class="acard-ph" style="background:'+alb.color+';display:none">\uD83C\uDFB5</div>'}
+      return '<div class="acard" style="border-left-color:'+alb.color+'"><div class="acard-inner"><div class="acard-cover">'+coverHTML+'</div><div class="acard-info"><div class="acard-hd"><span class="acard-name">'+es(alb.name)+'</span><span class="acard-year">'+(alb.merged?'2008-'+alb.year:alb.year)+'</span></div><div class="acard-stats"><span class="acard-stat">均 <span>'+(s.mean!==null?s.mean.toFixed(2):'\u2014')+'</span></span><span class="acard-stat">次 <span>'+s.rc+'</span></span></div></div><div class="acard-rank">#'+(rank+1)+'</div></div></div>';
     }).join('');
     renderGChart(gs);
   }catch(e){console.error(e)}
 }
 function renderGChart(stats){
-  if(gc)gc.destroy();const lb=stats.filter(a=>a.stats.mean!==null);
-  gc=new Chart(document.getElementById('gChartCanvas').getContext('2d'),{type:'bar',data:{labels:lb.map(function(a){return a.name.length>12?a.name.substring(0,11)+'...':a.name}),datasets:[{data:lb.map(function(a){return a.stats.mean}),backgroundColor:lb.map(function(a){return a.color+'99'}),borderColor:lb.map(function(a){return a.color}),borderWidth:2,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:8},color:'#a09888',maxRotation:45},grid:{display:false}},y:{min:1,max:10,ticks:{stepSize:2,font:{size:9},color:'#a09888'},grid:{color:'rgba(255,255,255,0.06)'}}},animation:{duration:500}});
+  if(gc)gc.destroy();
+  var lb=stats.filter(function(a){return a.stats.mean!==null});
+  var ctx2=document.getElementById('gChartCanvas').getContext('2d');
+  var lbls=lb.map(function(a){return a.name.length>12?a.name.substring(0,11)+'\u2026':a.name});
+  var vals=lb.map(function(a){return a.stats.mean});
+  var bgs=lb.map(function(a){return a.color+'99'});
+  var brds=lb.map(function(a){return a.color});
+  gc=new Chart(ctx2,{type:'bar',data:{labels:lbls,datasets:[{data:vals,backgroundColor:bgs,borderColor:brds,borderWidth:2,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:8},color:'#a09888',maxRotation:45},grid:{display:false}},y:{min:1,max:10,ticks:{stepSize:2,font:{size:9},color:'#a09888'},grid:{color:'rgba(255,255,255,0.06)'}}},animation:{duration:500}});
 }
 
-// ==================== TOGGLE ====================
-document.getElementById('btnMean').addEventListener('click',()=>{if(sm!=='mean'){sm='mean';renderResults(true)}});
-document.getElementById('btnVar').addEventListener('click',()=>{if(sm!=='variance'){sm='variance';renderResults(true)}});
+document.getElementById('btnMean').addEventListener('click',function(){if(sm!=='mean'){sm='mean';renderResults(true)}});
+document.getElementById('btnVar').addEventListener('click',function(){if(sm!=='variance'){sm='variance';renderResults(true)}});
 
-// ==================== EXPORT ====================
 document.getElementById('btnExport').addEventListener('click',async function(){
-  const ea=document.getElementById('exportArea');const origBg=ea.style.background;ea.style.background='#0d0d0d';
-  try{const cnv=await html2canvas(ea,{scale:2,backgroundColor:'#0d0d0d',allowTaint:true,useCORS:false,width:ea.scrollWidth,height:ea.scrollHeight});const a=document.createElement('a');a.download='ts-ranking.png';a.href=cnv.toDataURL('image/png');a.click();showT('已导出')}catch(e){showT('导出失败')}
+  var ea=document.getElementById('exportArea'),origBg=ea.style.background;ea.style.background='#0d0d0d';
+  try{var cnv=await html2canvas(ea,{scale:2,backgroundColor:'#0d0d0d',allowTaint:true,useCORS:false,width:ea.scrollWidth,height:ea.scrollHeight});var a=document.createElement('a');a.download='ts-ranking.png';a.href=cnv.toDataURL('image/png');a.click();showT('已导出')}catch(e){showT('导出失败')}
   ea.style.background=origBg;
 });
 
-// ==================== HELPERS ====================
 function updateBtns(){document.getElementById('btnMean').classList.toggle('active',sm==='mean');document.getElementById('btnVar').classList.toggle('active',sm==='variance')}
-function es(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
-function showT(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+function es(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function showT(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2000)}
 function restartQuiz(){ratings={};saveR();localStorage.removeItem('ts_done_v3');ci=0;lastAlbumId=null;submitted=false;showPage('pageLanding');initLanding()}
 
 loadR();initLanding();
