@@ -101,6 +101,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
     <p class="landing-sub">为你听过的每首歌打分<br>发现你的专属 Taylor 专辑排名</p>
     <button class="btn-start" onclick="startQuiz()">🎵 开始测评</button>
     <button class="btn-resume" id="btnResume" style="display:none" onclick="resumeQuiz()">↩ 继续上次进度</button>
+    <button class="btn-resume" id="btnViewResults" style="display:none;border-color:#c9a96e;color:#8b6914" onclick="viewResults()">📊 查看我的结果</button>
   </div>
 </div>
 <div class="page" id="pageQuiz">
@@ -141,6 +142,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
     <div class="stats-bar" id="gStatsBar"></div>
     <div class="albums-grid" id="gRankingGrid"></div>
     <div class="chart-wrap"><canvas id="gChartCanvas"></canvas></div>
+    <div class="sec-title">🎵 最高分单曲 Top 50</div>
+    <div id="gTopSongs" style="margin-bottom:20px"></div>
     <div style="text-align:center;padding:32px 0;color:#a09888;font-size:.7rem">数据匿名保存 · 仅供统计</div>
   </div>
 </div>
@@ -272,7 +275,10 @@ function initLanding(){
   var cvs=[];for(var i=0;i<albums.length;i++){if(albums[i].cv)cvs.push(albums[i].cv)}
   for(var j=0;j<22;j++){var img=document.createElement('img');img.src=cvs[j%cvs.length];img.className='cover-float';img.style.left=Math.random()*90+'%';img.style.top=Math.random()*90+'%';img.style.animationDelay=Math.random()*6+'s';img.style.animationDuration=(5+Math.random()*6)+'s';img.onerror=function(){this.remove()};bg.appendChild(img)}
   if(cntR()>0)document.getElementById('btnResume').style.display='';
+  if(localStorage.getItem('ts_quiz_completed_v5'))document.getElementById('btnViewResults').style.display='';
 }
+
+function viewResults(){showPage('pageResults');renderResults(true);fetchGlobal();}
 
 function renderEmoji(aid){
   var bg=document.getElementById('emojiBg');
@@ -336,6 +342,7 @@ function prevSong(){if(ci>0){ci--;renderQuiz()}}
 
 function finishQuiz(){
   document.getElementById('doneOverlay').classList.add('show');
+  localStorage.setItem('ts_quiz_completed_v5','true');
   var uid=getUid();
   sbPost({user_id:uid,ratings:ratings,updated_at:new Date().toISOString()},function(){},function(){});
   setTimeout(function(){
@@ -403,7 +410,35 @@ function fetchGlobal(){
       return '<div class="acard" style="border-left-color:'+alb.c+'"><div class="acard-inner"><div class="acard-cover">'+ch+'</div><div class="acard-info"><div class="acard-hd"><span class="acard-name">'+escapeText(alb.name)+'</span><span class="acard-year">'+(alb.mg?'2008-'+alb.yr:alb.yr)+'</span></div><div class="acard-stats"><span class="acard-stat">均 <span>'+(s.mean!==null?s.mean.toFixed(2):'—')+'</span></span><span class="acard-stat">次 <span>'+s.rc+'</span></span></div></div><div class="acard-rank">#'+(rank+1)+'</div></div></div>';
     }).join('');
     renderGChart(gs);
+    renderTopSongs(data);
   },function(e){console.error(e)});
+}
+
+function renderTopSongs(allData){
+  var songScores={};
+  for(var j=0;j<allData.length;j++){
+    var row=allData[j];if(!row.ratings)continue;
+    for(var k=0;k<albums.length;k++){
+      var alb=albums[k],aid=alb.id,o=origSongs[aid],tv=tvVaultSongs[aid];
+      for(var si=0;si<o.length;si++){var v=(row.ratings[aid]||{})[si];if(v&&v>=1){var key=aid+'_'+si;if(!songScores[key])songScores[key]={sum:0,count:0,name:o[si],album:alb.name,color:alb.c};songScores[key].sum+=v;songScores[key].count++}}
+      if(tv){for(var ti=0;ti<tv.s.length;ti++){var v2=(row.ratings[aid]||{})[o.length+ti];if(v2&&v2>=1){var key2=aid+'_v'+ti;if(!songScores[key2])songScores[key2]={sum:0,count:0,name:tv.s[ti],album:alb.name+' (TV)',color:alb.c};songScores[key2].sum+=v2;songScores[key2].count++}}}
+    }
+  }
+  var arr=[];
+  for(var k in songScores){if(songScores.hasOwnProperty(k)){var s=songScores[k];s.avg=s.sum/s.count;arr.push(s)}}
+  arr.sort(function(a,b){return b.avg-a.avg});
+  var top=arr.slice(0,50);
+  var h='<div style="font-size:.78rem;color:#a09888;text-align:center;margin-bottom:8px">你可能是第 '+allData.length+' 位参与者</div>';
+  for(var i=0;i<top.length;i++){
+    var t=top[i];
+    h+='<div style="display:flex;align-items:center;background:#1a1a1a;border-radius:8px;padding:6px 10px;margin-bottom:4px;border-left:3px solid '+t.color+'">';
+    h+='<span style="width:28px;font-size:.75rem;color:#a09888;text-align:center">'+(i+1)+'</span>';
+    h+='<span style="flex:1;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px">'+escapeText(t.name)+'</span>';
+    h+='<span style="font-size:.7rem;color:#888;margin-right:6px">'+escapeText(t.album)+'</span>';
+    h+='<span style="font-weight:700;color:#c9a96e;font-size:.9rem">'+t.avg.toFixed(2)+'</span>';
+    h+='</div>';
+  }
+  document.getElementById('gTopSongs').innerHTML=h;
 }
 
 function renderGChart(stats){
